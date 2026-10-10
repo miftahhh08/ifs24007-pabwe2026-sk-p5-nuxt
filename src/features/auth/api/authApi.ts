@@ -1,4 +1,4 @@
-import { fetchApi, type ApiResponse } from "../../../helpers/apiHelper";
+import { apiFetch } from "../../../helpers/apiHelper";
 
 export interface LoginPayload {
   email: string;
@@ -11,34 +11,8 @@ export interface RegisterPayload {
   password: string;
 }
 
-export interface AuthUser {
-  id: number;
-  name: string;
-  email: string;
-  [key: string]: any;
-}
+export const postLogin = (payload: LoginPayload) =>
+  apiFetch<{ token: string }>("/auth/login", { method: "POST", body: payload, auth: false });
 
-export interface LoginData {
-  token: string;
-  user?: AuthUser;
-}
-
-export const authApi = {
-  /** POST /auth/login */
-  login(payload: LoginPayload): Promise<ApiResponse<LoginData>> {
-    return fetchApi<LoginData>("/auth/login", {
-      method: "POST",
-      body: { ...payload },
-      withAuth: false,
-    });
-  },
-
-  /** POST /auth/register */
-  register(payload: RegisterPayload): Promise<ApiResponse<null>> {
-    return fetchApi<null>("/auth/register", {
-      method: "POST",
-      body: { ...payload },
-      withAuth: false,
-    });
-  },
-};
+export const postRegister = (payload: RegisterPayload) =>
+  apiFetch("/auth/register", { method: "POST", body: payload, auth: false });
