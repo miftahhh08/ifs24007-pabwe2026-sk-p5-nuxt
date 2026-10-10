@@ -85,7 +85,7 @@ export async function fetchApi<T = any>(
     const json = await response.json();
 
     return {
-      success: json.status === "success",
+      success: json.status === "success" || json.success === true,
       message: json.message ?? "",
       data: json.data as T,
     };
@@ -96,4 +96,35 @@ export async function fetchApi<T = any>(
       data: null as T,
     };
   }
+}
+
+/* ----------------------------- Pesan error API ---------------------------- */
+
+/**
+ * Membuat pesan error yang ramah dibaca dari respons gagal.
+ * Pesan validasi per-field (data: { email: ["..."] }) ikut digabungkan.
+ */
+export function getErrorMessage(
+  response: ApiResponse,
+  fallback = "Terjadi kesalahan, silakan coba lagi."
+): string {
+  const data = response.data;
+  const messages: string[] = [];
+
+  if (data && typeof data === "object") {
+    Object.values(data).forEach((value) => {
+      if (Array.isArray(value)) {
+        value.forEach((item) => {
+          if (typeof item === "string") messages.push(item);
+        });
+      }
+    });
+  }
+
+  if (messages.length > 0) {
+    const detail = messages.join(" ");
+    return response.message ? `${response.message}: ${detail}` : detail;
+  }
+
+  return response.message || fallback;
 }
