@@ -80,3 +80,29 @@ export function formatDateTime(value?: string | null): string {
 
   return `${datePart} pukul ${timePart}`;
 }
+
+/* --------------------------------- Avatar --------------------------------- */
+
+/** "Budi Santoso" -> "BS", "budi" -> "B", kosong -> "?" */
+export function getInitials(name?: string | null): string {
+  const words = (name ?? "").trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return "?";
+
+  const first = words[0]!.charAt(0);
+  const last = words.length > 1 ? words[words.length - 1]!.charAt(0) : "";
+  return (first + last).toUpperCase();
+}
+
+/**
+ * Mengubah path foto dari API menjadi URL lengkap.
+ * - URL penuh (http/https) dipakai apa adanya
+ * - path relatif ("img/profile/1.png") digabung dengan host API
+ * - kosong -> null (tampilkan inisial sebagai gantinya)
+ */
+export function getPhotoUrl(photo?: string | null): string | null {
+  if (!photo) return null;
+  if (/^https?:\/\//i.test(photo)) return photo;
+
+  const origin = new URL(DELCOM_BASEURL).origin;
+  return `${origin}/${photo.replace(/^\/+/, "")}`;
+}
