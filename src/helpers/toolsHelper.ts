@@ -1,0 +1,82 @@
+import Swal from "sweetalert2";
+
+/* ---------------------------- Dialog SweetAlert2 --------------------------- */
+
+export function showSuccessDialog(message: string, title = "Berhasil") {
+  return Swal.fire({
+    icon: "success",
+    title,
+    text: message,
+    confirmButtonColor: "#059669",
+  });
+}
+
+export function showErrorDialog(message: string, title = "Gagal") {
+  return Swal.fire({
+    icon: "error",
+    title,
+    text: message,
+    confirmButtonColor: "#059669",
+  });
+}
+
+export async function showConfirmDialog(
+  message: string,
+  title = "Apakah kamu yakin?",
+  confirmText = "Ya, lanjutkan"
+): Promise<boolean> {
+  const result = await Swal.fire({
+    icon: "warning",
+    title,
+    text: message,
+    showCancelButton: true,
+    confirmButtonText: confirmText,
+    cancelButtonText: "Batal",
+    confirmButtonColor: "#dc2626",
+    cancelButtonColor: "#64748b",
+  });
+
+  return result.isConfirmed;
+}
+
+/* -------------------------------- Formatter -------------------------------- */
+
+/** 2500000 -> "Rp 2.500.000" */
+export function formatRupiah(value: number | string | null | undefined): string {
+  const amount = Number(value ?? 0) || 0;
+  const formatted = new Intl.NumberFormat("id-ID", {
+    maximumFractionDigits: 0,
+  }).format(Math.abs(amount));
+
+  return `${amount < 0 ? "-" : ""}Rp ${formatted}`;
+}
+
+/** "2024-10-05T12:09:16.000000Z" -> "5 Oktober 2024" */
+export function formatDate(value?: string | null): string {
+  if (!value) return "-";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return date.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+/** "2024-10-05T12:09:16.000000Z" -> "5 Oktober 2024 pukul 19.09" */
+export function formatDateTime(value?: string | null): string {
+  if (!value) return "-";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+
+  const datePart = formatDate(value);
+  const timePart = date.toLocaleTimeString("id-ID", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  return `${datePart} pukul ${timePart}`;
+}
