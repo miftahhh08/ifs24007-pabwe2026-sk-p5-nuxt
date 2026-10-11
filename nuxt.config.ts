@@ -5,7 +5,7 @@ const customPort = Number(process.env.APP_PORT || process.env.PORT) || 3000;
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: "2024-11-01",
-  devtools: { enabled: true },
+  devtools: { enabled: false },
   telemetry: false,
 
   // SPA mode: tanpa SSR, karena token disimpan di localStorage (hanya ada di browser)
