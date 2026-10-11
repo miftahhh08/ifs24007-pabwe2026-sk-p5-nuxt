@@ -1,140 +1,77 @@
 <script setup lang="ts">
-import { reactive, ref } from "vue";
 import { RouterLink, useRouter } from "vue-router";
-import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-vue-next";
-import { useInput } from "../../../hooks/useInput";
 import { useAuthStore } from "../states/authStore";
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { useInput } from "../../../hooks/useInput";
+import { showErrorDialog, showSuccessDialog } from "../../../helpers/toolsHelper";
 
 const router = useRouter();
 const authStore = useAuthStore();
+const { value: email } = useInput("");
+const { value: password } = useInput("");
 
-const [email, onEmailChange] = useInput("");
-const [password, onPasswordChange] = useInput("");
-const showPassword = ref(false);
+async function handleSubmit() {
+  if (!email.value.trim() || !password.value) {
+    await showErrorDialog("Email dan kata sandi wajib diisi.");
+    return;
+  }
 
-const errors = reactive({ email: "", password: "" });
-
-function validate(): boolean {
-  const emailValue = email.value.trim();
-
-  if (!emailValue) errors.email = "Email wajib diisi.";
-  else if (!EMAIL_REGEX.test(emailValue)) errors.email = "Format email tidak valid.";
-  else errors.email = "";
-
-  errors.password = password.value ? "" : "Kata sandi wajib diisi.";
-
-  return !errors.email && !errors.password;
-}
-
-async function onSubmit() {
-  if (!validate()) return;
-
-  const isSuccess = await authStore.login({
+  const response = await authStore.login({
     email: email.value.trim(),
     password: password.value,
   });
 
-  if (isSuccess) router.push("/");
+  if (!response.success) {
+    await showErrorDialog(response.message);
+    return;
+  }
+
+  await showSuccessDialog(response.message);
+  await router.replace("/");
 }
 </script>
 
 <template>
-  <div data-testid="login-page">
-    <div class="mb-8">
-      <h2 class="text-3xl font-extrabold tracking-tight text-slate-900">
-        Selamat datang kembali 👋
-      </h2>
-      <p class="mt-2 text-slate-500">Masuk untuk melanjutkan pencatatan arus kasmu.</p>
-    </div>
+  <div>
+    <h1 class="text-3xl font-extrabold tracking-tight">Masuk</h1>
+    <p class="mt-2 text-slate-500">Lanjutkan ke dasbor arus kas kamu.</p>
 
-    <form class="space-y-5" novalidate data-testid="login-form" @submit.prevent="onSubmit">
-      <!-- Email -->
+    <form class="mt-8 space-y-5" data-testid="login-form" @submit.prevent="handleSubmit">
       <div>
-        <label for="email" class="mb-1.5 block text-sm font-semibold text-slate-700"
-          >Email</label
-        >
-        <div class="relative">
-          <Mail class="pointer-events-none absolute left-3.5 top-3.5 h-5 w-5 text-slate-400" />
-          <input
-            id="email"
-            type="email"
-            autocomplete="email"
-            placeholder="nama@email.com"
-            data-testid="email-input"
-            :value="email"
-            :class="[
-              'w-full rounded-xl border bg-white py-3 pl-11 pr-4 text-sm outline-none transition focus:ring-4',
-              errors.email
-                ? 'border-red-400 focus:ring-red-100'
-                : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-100',
-            ]"
-            @input="onEmailChange"
-          />
-        </div>
-        <p v-if="errors.email" class="mt-1.5 text-xs font-medium text-red-600" data-testid="email-error">
-          {{ errors.email }}
-        </p>
+        <label for="login-email" class="mb-1.5 block text-sm font-semibold">Email</label>
+        <input
+          id="login-email"
+          v-model="email"
+          type="email"
+          autocomplete="email"
+          placeholder="nama@email.com"
+          class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20"
+        />
       </div>
-
-      <!-- Password -->
       <div>
-        <label for="password" class="mb-1.5 block text-sm font-semibold text-slate-700"
-          >Kata Sandi</label
-        >
-        <div class="relative">
-          <Lock class="pointer-events-none absolute left-3.5 top-3.5 h-5 w-5 text-slate-400" />
-          <input
-            id="password"
-            :type="showPassword ? 'text' : 'password'"
-            autocomplete="current-password"
-            placeholder="••••••••"
-            data-testid="password-input"
-            :value="password"
-            :class="[
-              'w-full rounded-xl border bg-white py-3 pl-11 pr-12 text-sm outline-none transition focus:ring-4',
-              errors.password
-                ? 'border-red-400 focus:ring-red-100'
-                : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-100',
-            ]"
-            @input="onPasswordChange"
-          />
-          <button
-            type="button"
-            class="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600"
-            data-testid="toggle-password"
-            :aria-label="showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'"
-            @click="showPassword = !showPassword"
-          >
-            <EyeOff v-if="showPassword" class="h-5 w-5" />
-            <Eye v-else class="h-5 w-5" />
-          </button>
-        </div>
-        <p v-if="errors.password" class="mt-1.5 text-xs font-medium text-red-600" data-testid="password-error">
-          {{ errors.password }}
-        </p>
+        <label for="login-password" class="mb-1.5 block text-sm font-semibold">Kata sandi</label>
+        <input
+          id="login-password"
+          v-model="password"
+          type="password"
+          autocomplete="current-password"
+          placeholder="Masukkan kata sandi"
+          class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20"
+        />
       </div>
-
       <button
         type="submit"
         :disabled="authStore.isAuthLogin"
-        class="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
-        data-testid="login-button"
+        class="w-full rounded-xl bg-emerald-600 px-4 py-3 font-bold text-white transition hover:bg-emerald-700 disabled:opacity-60"
       >
-        <Loader2 v-if="authStore.isAuthLogin" class="h-4 w-4 animate-spin" />
-        {{ authStore.isAuthLogin ? "Memproses..." : "Masuk" }}
+        Masuk
       </button>
     </form>
 
-    <p class="mt-8 text-center text-sm text-slate-500">
+    <p class="mt-6 text-center text-sm text-slate-500">
       Belum punya akun?
-      <RouterLink
-        to="/auth/register"
-        class="font-bold text-emerald-600 hover:text-emerald-700"
-        data-testid="to-register"
-        >Daftar sekarang</RouterLink
-      >
+      <RouterLink to="/auth/register" class="font-bold text-emerald-700 hover:underline">
+        Daftar sekarang
+      </RouterLink>
     </p>
   </div>
 </template>

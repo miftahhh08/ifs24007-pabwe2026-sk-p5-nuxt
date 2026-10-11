@@ -1,29 +1,28 @@
-import { ref, type Ref } from "vue";
+import { ref } from "vue";
+import type { Ref } from "vue";
 
-export type InputChangeHandler = (event: Event) => void;
+export interface UseInputReturn<T> {
+  value: Ref<T>;
+  onChange: (event: Event) => void;
+  reset: () => void;
+}
 
 /**
- * Composable untuk mengelola satu input form.
- *
- * const [name, onNameChange, resetName] = useInput("");
- * <input :value="name" @input="onNameChange" />
+ * Hook kecil untuk mengelola nilai input form.
+ * - `value`    : ref yang bisa dipakai dengan v-model
+ * - `onChange` : handler untuk @input / @change
+ * - `reset`    : mengembalikan nilai ke nilai awal
  */
-export function useInput(
-  initialValue: string = ""
-): [Ref<string>, InputChangeHandler, () => void] {
-  const value = ref(initialValue);
+export function useInput<T = string>(initialValue: T): UseInputReturn<T> {
+  const value = ref(initialValue) as Ref<T>;
 
-  const onChange: InputChangeHandler = (event) => {
-    const target = event.target as
-      | HTMLInputElement
-      | HTMLTextAreaElement
-      | HTMLSelectElement;
-    value.value = target.value;
+  const onChange = (event: Event) => {
+    value.value = (event.target as HTMLInputElement).value as unknown as T;
   };
 
   const reset = () => {
     value.value = initialValue;
   };
 
-  return [value, onChange, reset];
+  return { value, onChange, reset };
 }

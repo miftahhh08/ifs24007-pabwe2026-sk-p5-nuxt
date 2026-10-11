@@ -1,141 +1,141 @@
-const ACCESS_TOKEN_KEY = "access_token";
+export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 
-/** Bentuk respons standar dari Delcom Open API. */
 export interface ApiResponse<T = any> {
   success: boolean;
   message: string;
   data: T;
+  status: number;
 }
 
-export type QueryValue = string | number | boolean | null | undefined;
-export type QueryParams = Record<string, QueryValue>;
-
-export interface FetchApiOptions {
-  method?: "GET" | "POST" | "PUT" | "DELETE";
-  /** Query string. Nilai kosong (null/undefined/"") otomatis diabaikan. */
-  params?: QueryParams;
-  /** Body JSON, atau FormData untuk unggah berkas. */
-  body?: Record<string, any> | FormData;
-  /** Jika false, header Authorization tidak dikirim (login/register). */
-  withAuth?: boolean;
+export interface ApiRequestOptions {
+  method: HttpMethod;
+  query?: Record<string, string | number | boolean | null | undefined>;
+  body?: unknown;
+  formData?: FormData;
+  /** Default: true. Isi false untuk endpoint publik (login/register). */
+  auth?: boolean;
 }
 
-/* ----------------------------- Token storage ----------------------------- */
+const TOKEN_KEY = "delcom_cashflow_token";
+
+/* ---------- Token ---------- */
 
 export function getAccessToken(): string | null {
-  return localStorage.getItem(ACCESS_TOKEN_KEY);
+  return localStorage.getItem(TOKEN_KEY);
 }
 
 export function putAccessToken(token: string): void {
-  localStorage.setItem(ACCESS_TOKEN_KEY, token);
+  localStorage.setItem(TOKEN_KEY, token);
 }
 
 export function removeAccessToken(): void {
-  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  localStorage.removeItem(TOKEN_KEY);
 }
 
-/* ------------------------------ URL builder ------------------------------ */
+/* ---------- Query string ---------- */
 
-export function buildUrl(path: string, params?: QueryParams): string {
-  const searchParams = new URLSearchParams();
-
-  Object.entries(params ?? {}).forEach(([key, value]) => {
-    if (value !== null && value !== undefined && value !== "") {
-      searchParams.append(key, String(value));
+export function buildQueryString(
+  query: Record<string, string | number | boolean | null | undefined>
+): string {
+  const params = new URLSearchParams();
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      params.append(key, String(value));
     }
   });
-
-  const query = searchParams.toString();
-  return `${DELCOM_BASEURL}${path}${query ? `?${query}` : ""}`;
+  const result = params.toString();
+  return result ? `?${result}` : "";
 }
 
-/* ------------------------------- HTTP fetch ------------------------------ */
+/* ---------- Fetch wrapper ---------- */
 
-export async function fetchApi<T = any>(
+export async function apiFetch<T = any>(
   path: string,
-  options: FetchApiOptions = {}
+  options: ApiRequestOptions
 ): Promise<ApiResponse<T>> {
-  const { method = "GET", params, body, withAuth = true } = options;
-
-  const headers: Record<string, string> = { Accept: "application/json" };
-
-  const token = withAuth ? getAccessToken() : null;
-  if (token) {
+  const headers: Record<string, string> = {};
+  const token = getAccessToken();
+  if (options.auth !== false && token) {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  let requestBody: BodyInit | undefined;
-  if (body instanceof FormData) {
-    // Content-Type multipart di-set otomatis oleh browser (beserta boundary)
-    requestBody = body;
-  } else if (body) {
+  let body: BodyInit | undefined;
+  if (options.formData) {
+    // Content-Type multipart diatur otomatis oleh browser
+    body = options.formData;
+  } else if (options.body !== undefined) {
     headers["Content-Type"] = "application/json";
-    requestBody = JSON.stringify(body);
+    body = JSON.stringify(options.body);
   }
 
   try {
-    const response = await fetch(buildUrl(path, params), {
-      method,
-      headers,
-      body: requestBody,
-    });
-
-    // Token ditolak server (kedaluwarsa/tidak valid): bersihkan & minta login ulang.
-    if (response.status === 401 && token) {
-      removeAccessToken();
-      if (!window.location.pathname.startsWith("/auth")) {
-        window.location.assign("/auth/login");
-      }
-      return {
-        success: false,
-        message: "Sesi berakhir, silakan login kembali.",
-        data: null as T,
-      };
-    }
-
-    const json = await response.json();
+    const url = `${DELCOM_BASEURL}${path}${buildQueryString(options.query || {})}`;
+    const response = await fetch(url, { method: options.method, headers, body });
+    const json = await response.json().catch(() => null);
 
     return {
-      success: json.status === "success" || json.success === true,
-      message: json.message ?? "",
-      data: json.data as T,
+      success: Boolean(response.ok && json && json.success),
+      message:
+        (json && json.message) ||
+        (response.ok ? "Berhasil" : "Terjadi kesalahan pada server"),
+      data: json ? json.data : null,
+      status: response.status,
     };
   } catch {
     return {
       success: false,
-      message: "Terjadi kesalahan jaringan atau server tidak merespons.",
+      message: "Tidak dapat terhubung ke server",
       data: null as T,
+      status: 0,
     };
   }
 }
 
-/* ----------------------------- Pesan error API ---------------------------- */
+/* ---------- Pembaca data response yang toleran terhadap bentuk data ---------- */
 
-/**
- * Membuat pesan error yang ramah dibaca dari respons gagal.
- * Pesan validasi per-field (data: { email: ["..."] }) ikut digabungkan.
- */
-export function getErrorMessage(
-  response: ApiResponse,
-  fallback = "Terjadi kesalahan, silakan coba lagi."
-): string {
-  const data = response.data;
-  const messages: string[] = [];
+export function isPlainObject(value: unknown): value is Record<string, any> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
 
-  if (data && typeof data === "object") {
-    Object.values(data).forEach((value) => {
-      if (Array.isArray(value)) {
-        value.forEach((item) => {
-          if (typeof item === "string") messages.push(item);
-        });
+/** Ambil array dari `data` (langsung array, atau di bawah salah satu key). */
+export function pickArray(data: unknown, keys: string[]): any[] {
+  if (Array.isArray(data)) {
+    return data;
+  }
+  if (isPlainObject(data)) {
+    for (const key of keys) {
+      if (Array.isArray(data[key])) {
+        return data[key];
       }
-    });
+    }
   }
+  return [];
+}
 
-  if (messages.length > 0) {
-    const detail = messages.join(" ");
-    return response.message ? `${response.message}: ${detail}` : detail;
+/** Ambil object dari `data` (di bawah salah satu key, atau `data` itu sendiri). */
+export function pickObject(data: unknown, keys: string[]): Record<string, any> {
+  if (isPlainObject(data)) {
+    for (const key of keys) {
+      if (isPlainObject(data[key])) {
+        return data[key];
+      }
+    }
+    return data;
   }
+  return {};
+}
 
-  return response.message || fallback;
+/** Ambil angka pertama yang valid dari daftar key; jika tidak ada pakai fallback. */
+export function pickNumber(
+  source: Record<string, any>,
+  keys: string[],
+  fallback: number
+): number {
+  for (const key of keys) {
+    const raw = source[key];
+    if (raw !== undefined && raw !== null && raw !== "" && Number.isFinite(Number(raw))) {
+      return Number(raw);
+    }
+  }
+  return fallback;
 }
