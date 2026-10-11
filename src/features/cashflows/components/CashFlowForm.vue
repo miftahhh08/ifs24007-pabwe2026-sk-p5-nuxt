@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { useInput } from "../../../hooks/useInput";
 import { showErrorDialog, sourceLabels, typeLabels } from "../../../helpers/toolsHelper";
 import type { CashFlowPayload, CashFlowSource, CashFlowType } from "../api/cashFlowApi";
@@ -113,7 +113,7 @@ const fieldClass =
       <button
         type="submit"
         :disabled="busy"
-        class="rounded-xl bg-emerald-600 px-5 py-2.5 font-bold text-white hover:bg-emerald-700 disabled:opacity-60"
+        class="rounded-xl bg-emerald-700 px-5 py-2.5 font-bold text-white hover:bg-emerald-800 disabled:opacity-60"
       >
         {{ submitLabel }}
       </button>

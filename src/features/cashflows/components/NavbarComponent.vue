@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { LogOut, Menu } from "lucide-vue-next";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "../../auth/states/authStore";
@@ -48,7 +48,7 @@ async function handleLogout() {
           </p>
         </template>
         <p v-else class="text-sm text-slate-500">Memuat profil...</p>
-        <p class="mt-0.5 flex items-center justify-end gap-1 text-xs font-semibold text-emerald-600">
+        <p class="mt-0.5 flex items-center justify-end gap-1 text-xs font-semibold text-emerald-700">
           <span class="size-1.5 rounded-full bg-emerald-500" />
           Sesi aktif
         </p>

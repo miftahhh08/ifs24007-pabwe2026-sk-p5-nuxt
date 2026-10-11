@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
 import { Eye, Pencil, Plus, Trash2 } from "lucide-vue-next";
@@ -32,8 +32,8 @@ const editing = ref<CashFlow | null>(null);
 
 const metrics = computed(() => [
   { key: "balance", title: "Total Saldo Kas Bersih", value: store.stats.total_balance, tone: "text-slate-900" },
-  { key: "inflow", title: "Total Pemasukan", value: store.stats.total_inflow, tone: "text-emerald-600" },
-  { key: "outflow", title: "Total Pengeluaran", value: store.stats.total_outflow, tone: "text-rose-600" },
+  { key: "inflow", title: "Total Pemasukan", value: store.stats.total_inflow, tone: "text-emerald-700" },
+  { key: "outflow", title: "Total Pengeluaran", value: store.stats.total_outflow, tone: "text-rose-700" },
   { key: "cash", title: "Saldo Kas Tunai", value: store.stats.cash, tone: "text-slate-900" },
   { key: "savings", title: "Saldo Tabungan", value: store.stats.savings, tone: "text-slate-900" },
   { key: "loans", title: "Saldo Pinjaman", value: store.stats.loans, tone: "text-slate-900" },
@@ -125,7 +125,7 @@ const fieldClass =
         <button
           type="button"
           data-testid="reset-all-button"
-          class="rounded-xl border border-rose-300 px-4 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50"
+          class="rounded-xl border border-rose-300 px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50"
           @click="handleDeleteAll"
         >
           Reset Semua
@@ -133,7 +133,7 @@ const fieldClass =
         <button
           type="button"
           data-testid="add-button"
-          class="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700"
+          class="flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-800"
           @click="showAdd = true"
         >
           <Plus class="size-4" />
@@ -256,7 +256,7 @@ const fieldClass =
                   type="button"
                   :data-testid="`delete-${item.id}`"
                   aria-label="Hapus"
-                  class="rounded-lg p-2 text-rose-600 hover:bg-rose-50"
+                  class="rounded-lg p-2 text-rose-700 hover:bg-rose-50"
                   @click="handleDelete(item)"
                 >
                   <Trash2 class="size-4" />

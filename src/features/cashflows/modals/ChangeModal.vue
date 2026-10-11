@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import CashFlowForm from "../components/CashFlowForm.vue";
 import { useCashFlowsStore } from "../states/cashFlowsStore";
 import { showErrorDialog, showSuccessDialog } from "../../../helpers/toolsHelper";

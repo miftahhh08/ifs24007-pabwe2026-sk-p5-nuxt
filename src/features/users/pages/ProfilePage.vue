@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { useUsersStore } from "../states/usersStore";
 import { useInput } from "../../../hooks/useInput";
@@ -87,7 +87,7 @@ const inputClass =
   "w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20";
 const cardClass = "rounded-2xl border border-slate-200 bg-white p-6 shadow-sm";
 const buttonClass =
-  "rounded-xl bg-emerald-600 px-5 py-2.5 font-bold text-white transition hover:bg-emerald-700 disabled:opacity-60";
+  "rounded-xl bg-emerald-700 px-5 py-2.5 font-bold text-white transition hover:bg-emerald-800 disabled:opacity-60";
 </script>
 
 <template>
@@ -134,6 +134,7 @@ const buttonClass =
       <form :class="cardClass" data-testid="photo-form" @submit.prevent="handlePhotoSubmit">
         <h2 class="mb-4 text-lg font-bold">Foto profil</h2>
         <div class="space-y-4">
+          <label for="profile-photo" class="block text-sm font-semibold">Pilih file foto</label>
           <input
             id="profile-photo"
             type="file"

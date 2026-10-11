@@ -58,6 +58,13 @@ export default defineNuxtConfig({
       htmlAttrs: {
         lang: "id",
       },
+      meta: [
+        {
+          name: "description",
+          content:
+            "Delcom Cash Flow: aplikasi pencatatan arus kas untuk memantau pemasukan, pengeluaran, dan saldo kas, tabungan, serta pinjaman.",
+        },
+      ],
       link: [
         { rel: "icon", type: "image/svg+xml", href: "/logo.svg" },
         { rel: "preconnect", href: "https://fonts.googleapis.com" },

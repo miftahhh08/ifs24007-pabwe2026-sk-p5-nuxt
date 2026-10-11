@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { RouterLink, useRouter } from "vue-router";
 import { useAuthStore } from "../states/authStore";
 import { useInput } from "../../../hooks/useInput";
@@ -75,7 +75,7 @@ async function handleSubmit() {
         id="register-submit-button"
         type="submit"
         :disabled="authStore.isAuthRegister"
-        class="w-full rounded-xl bg-emerald-600 px-4 py-3 font-bold text-white transition hover:bg-emerald-700 disabled:opacity-60"
+        class="w-full rounded-xl bg-emerald-700 px-4 py-3 font-bold text-white transition hover:bg-emerald-800 disabled:opacity-60"
       >
         Daftar
       </button>

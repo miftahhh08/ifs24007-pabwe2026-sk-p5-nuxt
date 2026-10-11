@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { onMounted } from "vue";
 import { useUsersStore } from "../states/usersStore";
 import { getInitials, resolveAssetUrl } from "../../../helpers/toolsHelper";

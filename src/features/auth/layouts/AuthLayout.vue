@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { onMounted } from "vue";
 import { RouterView, useRouter } from "vue-router";
 import { Wallet } from "lucide-vue-next";
@@ -33,7 +33,7 @@ onMounted(() => {
           pantau ringkasannya dalam satu dasbor.
         </p>
       </div>
-      <p class="text-sm text-emerald-200">Praktikum Pengembangan Aplikasi Web 2026</p>
+      <p class="text-sm text-emerald-100">Praktikum Pengembangan Aplikasi Web 2026</p>
     </aside>
 
     <main class="flex items-center justify-center p-6 sm:p-10">

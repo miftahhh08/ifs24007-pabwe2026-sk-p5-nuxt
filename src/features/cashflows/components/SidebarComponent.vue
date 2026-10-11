@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { LayoutDashboard, User, Users, Wallet } from "lucide-vue-next";
 import { RouterLink } from "vue-router";
 
@@ -29,7 +29,7 @@ const menus = [
       ]"
     >
       <div class="mb-8 flex items-center gap-2.5 px-2 text-lg font-extrabold tracking-tight">
-        <span class="flex size-9 items-center justify-center rounded-xl bg-emerald-600 text-white">
+        <span class="flex size-9 items-center justify-center rounded-xl bg-emerald-700 text-white">
           <Wallet class="size-5" />
         </span>
         Cash Flow

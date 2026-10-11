@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-vue-next";
@@ -102,7 +102,7 @@ onMounted(loadDetail);
         <button
           type="button"
           data-testid="detail-edit"
-          class="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 font-bold text-white hover:bg-emerald-700"
+          class="flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 font-bold text-white hover:bg-emerald-800"
           @click="showEdit = true"
         >
           <Pencil class="size-4" />
@@ -111,7 +111,7 @@ onMounted(loadDetail);
         <button
           type="button"
           data-testid="detail-delete"
-          class="flex items-center gap-2 rounded-xl border border-rose-300 px-4 py-2 font-semibold text-rose-600 hover:bg-rose-50"
+          class="flex items-center gap-2 rounded-xl border border-rose-300 px-4 py-2 font-semibold text-rose-700 hover:bg-rose-50"
           @click="handleDelete"
         >
           <Trash2 class="size-4" />
