@@ -115,3 +115,18 @@ export function getPhotoUrl(photo?: string | null): string | null {
   const origin = new URL(DELCOM_BASEURL).origin;
   return `${origin}/${photo.replace(/^\/+/, "")}`;
 }
+
+/* ---------------------------------- Label ---------------------------------- */
+
+/** Label tampilan untuk jenis arus kas (nilai dari API: inflow / outflow). */
+export const typeLabels: Record<string, string> = {
+  inflow: "Pemasukan",
+  outflow: "Pengeluaran",
+};
+
+/** Label tampilan untuk sumber dana (nilai dari API: cash / savings / loans). */
+export const sourceLabels: Record<string, string> = {
+  cash: "Tunai",
+  savings: "Tabungan",
+  loans: "Pinjaman",
+};
