@@ -26,9 +26,9 @@
     "vue-router": "^5.3.1"
   },
   "overrides": {
-    "dompurify": "^3.2.4",
-    "simple-git": "^3.36.0"
-  },
+  "dompurify": "^3.2.4",
+  "simple-git": "^4.0.2"
+},
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "@testing-library/jest-dom": "^7.0.1",
