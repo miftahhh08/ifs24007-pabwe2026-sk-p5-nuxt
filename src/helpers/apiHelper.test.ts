@@ -4,9 +4,11 @@ import {
   buildQueryString,
   getAccessToken,
   isPlainObject,
+  isSuccessBody,
   pickArray,
   pickNumber,
   pickObject,
+  pickString,
   putAccessToken,
   removeAccessToken,
 } from "./apiHelper";
@@ -110,6 +112,13 @@ describe("apiFetch", () => {
     expect(result.message).toBe("Ditolak");
   });
 
+  it("response ok tanpa field success dianggap sukses", async () => {
+    fetchMock.mockResolvedValue(mockResponse(true, 200, { message: "Berhasil login", data: { token: "t" } }));
+    const result = await apiFetch("/auth/login", { method: "POST", body: {}, auth: false });
+    expect(result.success).toBe(true);
+    expect(result.data).toEqual({ token: "t" });
+  });
+
   it("ok tanpa message memakai pesan default", async () => {
     fetchMock.mockResolvedValue(mockResponse(true, 200, { success: true, data: 1 }));
     const result = await apiFetch("/x", { method: "GET" });
@@ -145,7 +154,34 @@ describe("apiFetch", () => {
   });
 });
 
+describe("isSuccessBody", () => {
+  it("menilai sukses dari field success", () => {
+    expect(isSuccessBody({ success: true })).toBe(true);
+    expect(isSuccessBody({ success: "true" })).toBe(true);
+    expect(isSuccessBody({ success: false })).toBe(false);
+  });
+
+  it("menilai sukses dari field status", () => {
+    expect(isSuccessBody({ status: "success" })).toBe(true);
+    expect(isSuccessBody({ status: "OK" })).toBe(true);
+    expect(isSuccessBody({ status: "error" })).toBe(false);
+  });
+
+  it("tanpa penanda dianggap sukses, bukan object dianggap gagal", () => {
+    expect(isSuccessBody({ message: "Berhasil login", data: {} })).toBe(true);
+    expect(isSuccessBody(null)).toBe(false);
+    expect(isSuccessBody("teks")).toBe(false);
+  });
+});
+
 describe("pembaca data", () => {
+  it("pickString", () => {
+    expect(pickString({ a: "x" }, ["a"])).toBe("x");
+    expect(pickString({ a: "", b: 5, c: "ok" }, ["a", "b", "c"])).toBe("ok");
+    expect(pickString({}, ["a"])).toBe("");
+    expect(pickString(null, ["a"])).toBe("");
+  });
+
   it("isPlainObject", () => {
     expect(isPlainObject({})).toBe(true);
     expect(isPlainObject(null)).toBe(false);

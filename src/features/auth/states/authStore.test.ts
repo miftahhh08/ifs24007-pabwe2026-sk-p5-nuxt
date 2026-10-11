@@ -40,6 +40,24 @@ describe("authStore", () => {
     expect(store.isAuthLogin).toBe(false);
   });
 
+  it("login sukses dengan field access_token", async () => {
+    vi.mocked(postLogin).mockResolvedValue(ok({ access_token: "dari-access-token" }));
+    const store = useAuthStore();
+    const response = await store.login({ email: "a@b.c", password: "1" });
+    expect(response.success).toBe(true);
+    expect(store.token).toBe("dari-access-token");
+  });
+
+  it("login dianggap gagal jika response tidak memuat token", async () => {
+    vi.mocked(postLogin).mockResolvedValue(ok({}));
+    const store = useAuthStore();
+    const response = await store.login({ email: "a@b.c", password: "1" });
+    expect(response.success).toBe(false);
+    expect(response.message).toBe("Token tidak ditemukan pada response login.");
+    expect(store.token).toBeNull();
+    expect(getAccessToken()).toBeNull();
+  });
+
   it("login gagal tidak menyimpan token", async () => {
     vi.mocked(postLogin).mockResolvedValue(fail);
     const store = useAuthStore();

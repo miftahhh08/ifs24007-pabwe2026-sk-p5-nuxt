@@ -74,7 +74,7 @@ export async function apiFetch<T = any>(
     const json = await response.json().catch(() => null);
 
     return {
-      success: Boolean(response.ok && json && json.success),
+      success: response.ok && isSuccessBody(json),
       message:
         (json && json.message) ||
         (response.ok ? "Berhasil" : "Terjadi kesalahan pada server"),
@@ -95,6 +95,37 @@ export async function apiFetch<T = any>(
 
 export function isPlainObject(value: unknown): value is Record<string, any> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/**
+ * Menentukan apakah isi response menandakan sukses.
+ * - `success` boolean / "true"  -> dipakai langsung
+ * - `status` "success" / "ok"   -> sukses
+ * - tidak ada penanda sama sekali -> dianggap sukses (status HTTP sudah dicek terpisah)
+ */
+export function isSuccessBody(body: unknown): boolean {
+  if (!isPlainObject(body)) {
+    return false;
+  }
+  if (body.success !== undefined) {
+    return body.success === true || body.success === "true";
+  }
+  if (typeof body.status === "string") {
+    return ["success", "ok"].includes(body.status.toLowerCase());
+  }
+  return true;
+}
+
+/** Ambil string tidak kosong pertama dari daftar key. */
+export function pickString(source: unknown, keys: string[]): string {
+  if (isPlainObject(source)) {
+    for (const key of keys) {
+      if (typeof source[key] === "string" && source[key] !== "") {
+        return source[key];
+      }
+    }
+  }
+  return "";
 }
 
 /** Ambil array dari `data` (langsung array, atau di bawah salah satu key). */

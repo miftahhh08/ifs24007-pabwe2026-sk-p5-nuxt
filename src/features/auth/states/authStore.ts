@@ -1,5 +1,10 @@
 import { defineStore } from "pinia";
-import { getAccessToken, putAccessToken, removeAccessToken } from "../../../helpers/apiHelper";
+import {
+  getAccessToken,
+  pickString,
+  putAccessToken,
+  removeAccessToken,
+} from "../../../helpers/apiHelper";
 import { postLogin, postRegister } from "../api/authApi";
 import type { LoginPayload, RegisterPayload } from "../api/authApi";
 
@@ -24,11 +29,19 @@ export const useAuthStore = defineStore("auth", {
     async login(payload: LoginPayload) {
       this.isAuthLogin = true;
       const response = await postLogin(payload);
-      if (response.success) {
-        putAccessToken(response.data.token);
-        this.token = response.data.token;
-      }
       this.isAuthLogin = false;
+
+      if (!response.success) {
+        return response;
+      }
+
+      const token = pickString(response.data, ["token", "access_token", "accessToken"]);
+      if (!token) {
+        return { ...response, success: false, message: "Token tidak ditemukan pada response login." };
+      }
+
+      putAccessToken(token);
+      this.token = token;
       return response;
     },
     async register(payload: RegisterPayload) {
