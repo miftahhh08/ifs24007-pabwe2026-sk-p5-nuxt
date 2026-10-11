@@ -1,79 +1,136 @@
 import { defineStore } from "pinia";
-import { pickArray, pickObject } from "../../../helpers/apiHelper";
-import { getMe, getUsers, postPhoto, putMe, putPassword } from "../api/userApi";
-import type { PasswordPayload, ProfilePayload } from "../api/userApi";
+import { ref } from "vue";
+import { getErrorMessage } from "../../../helpers/apiHelper";
+import { showErrorDialog, showSuccessDialog } from "../../../helpers/toolsHelper";
+import {
+  userApi,
+  type ChangePasswordPayload,
+  type UpdateProfilePayload,
+  type User,
+} from "../api/userApi";
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  photo: string | null;
-  created_at?: string;
-  updated_at?: string;
-}
+export const useUsersStore = defineStore("users", () => {
+  /** Daftar seluruh pengguna sistem. */
+  const users = ref<User[]>([]);
+  /** Profil pengguna yang sedang login. */
+  const profile = ref<User | null>(null);
 
-export interface UsersState {
-  users: User[];
-  profile: User | null;
-  isUsers: boolean;
-  isProfile: boolean;
-  isProfileChange: boolean;
-  isPhotoChange: boolean;
-  isPasswordChange: boolean;
-}
+  // Status pemuatan data
+  const isUsers = ref(false);
+  const isProfile = ref(false);
 
-export const useUsersStore = defineStore("users", {
-  state: (): UsersState => ({
-    users: [],
-    profile: null,
-    isUsers: false,
-    isProfile: false,
-    isProfileChange: false,
-    isPhotoChange: false,
-    isPasswordChange: false,
-  }),
-  actions: {
-    async fetchUsers() {
-      this.isUsers = true;
-      const response = await getUsers();
-      if (response.success) {
-        this.users = pickArray(response.data, ["users"]);
-      }
-      this.isUsers = false;
-      return response;
-    },
-    async fetchProfile() {
-      this.isProfile = true;
-      const response = await getMe();
-      if (response.success) {
-        this.profile = pickObject(response.data, ["user"]) as User;
-      }
-      this.isProfile = false;
-      return response;
-    },
-    async changeProfile(payload: ProfilePayload) {
-      this.isProfileChange = true;
-      const response = await putMe(payload);
-      if (response.success) {
-        await this.fetchProfile();
-      }
-      this.isProfileChange = false;
-      return response;
-    },
-    async changePhoto(file: File) {
-      this.isPhotoChange = true;
-      const response = await postPhoto(file);
-      if (response.success) {
-        await this.fetchProfile();
-      }
-      this.isPhotoChange = false;
-      return response;
-    },
-    async changePassword(payload: PasswordPayload) {
-      this.isPasswordChange = true;
-      const response = await putPassword(payload);
-      this.isPasswordChange = false;
-      return response;
-    },
-  },
+  // Status mutasi (isXxx = sedang berjalan, isXxxed = baru saja berhasil)
+  const isProfileChange = ref(false);
+  const isProfileChanged = ref(false);
+  const isPhotoChange = ref(false);
+  const isPhotoChanged = ref(false);
+  const isPasswordChange = ref(false);
+  const isPasswordChanged = ref(false);
+
+  async function fetchUsers(): Promise<boolean> {
+    isUsers.value = true;
+    const response = await userApi.getUsers();
+    isUsers.value = false;
+
+    if (!response.success) {
+      showErrorDialog(getErrorMessage(response, "Gagal memuat daftar pengguna."));
+      return false;
+    }
+
+    users.value = response.data?.users ?? [];
+    return true;
+  }
+
+  /**
+   * Dibuat "diam" (tanpa dialog): jika gagal (mis. token kedaluwarsa),
+   * pemanggil yang memutuskan langkah selanjutnya.
+   */
+  async function fetchProfile(): Promise<boolean> {
+    isProfile.value = true;
+    const response = await userApi.getProfile();
+    isProfile.value = false;
+
+    if (!response.success || !response.data?.user) return false;
+
+    profile.value = response.data.user;
+    return true;
+  }
+
+  async function changeProfile(payload: UpdateProfilePayload): Promise<boolean> {
+    isProfileChange.value = true;
+    isProfileChanged.value = false;
+    const response = await userApi.updateProfile(payload);
+    isProfileChange.value = false;
+
+    if (!response.success) {
+      showErrorDialog(getErrorMessage(response, "Gagal memperbarui profil."));
+      return false;
+    }
+
+    profile.value = response.data?.user ?? ({ ...profile.value, ...payload } as User);
+    isProfileChanged.value = true;
+    await showSuccessDialog(response.message || "Profil berhasil diperbarui.");
+    return true;
+  }
+
+  async function changePhoto(file: File): Promise<boolean> {
+    isPhotoChange.value = true;
+    isPhotoChanged.value = false;
+    const response = await userApi.changePhoto(file);
+    isPhotoChange.value = false;
+
+    if (!response.success) {
+      showErrorDialog(getErrorMessage(response, "Gagal mengubah foto profil."));
+      return false;
+    }
+
+    await fetchProfile(); // ambil ulang agar URL foto terbaru terbaca
+    isPhotoChanged.value = true;
+    await showSuccessDialog(response.message || "Foto profil berhasil diperbarui.");
+    return true;
+  }
+
+  async function changePassword(payload: ChangePasswordPayload): Promise<boolean> {
+    isPasswordChange.value = true;
+    isPasswordChanged.value = false;
+    const response = await userApi.changePassword(payload);
+    isPasswordChange.value = false;
+
+    if (!response.success) {
+      showErrorDialog(getErrorMessage(response, "Gagal mengubah kata sandi."));
+      return false;
+    }
+
+    isPasswordChanged.value = true;
+    await showSuccessDialog(response.message || "Kata sandi berhasil diubah.");
+    return true;
+  }
+
+  /** Dipanggil saat logout agar data akun lama tidak terbawa. */
+  function reset() {
+    users.value = [];
+    profile.value = null;
+    isProfileChanged.value = false;
+    isPhotoChanged.value = false;
+    isPasswordChanged.value = false;
+  }
+
+  return {
+    users,
+    profile,
+    isUsers,
+    isProfile,
+    isProfileChange,
+    isProfileChanged,
+    isPhotoChange,
+    isPhotoChanged,
+    isPasswordChange,
+    isPasswordChanged,
+    fetchUsers,
+    fetchProfile,
+    changeProfile,
+    changePhoto,
+    changePassword,
+    reset,
+  };
 });

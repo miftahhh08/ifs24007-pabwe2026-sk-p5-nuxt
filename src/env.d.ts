@@ -1,10 +1,3 @@
-/// <reference types="vite/client" />
-
-// Konstanta global yang disuntikkan lewat `define` (nuxt.config.ts & vite.config.ts)
+// Deklarasi tipe global untuk konstanta yang disuntikkan lewat `define`
+// pada nuxt.config.ts (vite.define) dan vite.config.ts.
 declare const DELCOM_BASEURL: string;
-
-declare module "*.vue" {
-  import type { DefineComponent } from "vue";
-  const component: DefineComponent<object, object, any>;
-  export default component;
-}

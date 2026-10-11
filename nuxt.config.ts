@@ -8,16 +8,17 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   telemetry: false,
 
-  // SPA mode: tanpa SSR, karena token disimpan di localStorage (hanya ada di browser)
+  // SPA mode: tanpa SSR (routing & penyimpanan token di sisi client)
   ssr: false,
 
-  // Kode sumber aplikasi ada di folder src/
+  // Nuxt 4 default-nya "app/", kita arahkan ke "src/"
   srcDir: "src/",
 
-  // Aktifkan vue-router; daftar rute disuplai oleh src/router.options.ts
+  // Aktifkan vue-router; rute disuplai oleh src/router.options.ts
   pages: true,
 
   css: ["~/index.css"],
+
   modules: ["@pinia/nuxt"],
 
   vite: {

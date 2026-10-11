@@ -1,5 +1,5 @@
 {
-  "name": "username-pabwe2026-sk-p5-nuxt",
+  "name": "ifs24007-pabwe2026-sk-p5-nuxt",
   "type": "module",
   "private": true,
   "scripts": {
@@ -31,7 +31,6 @@
     "@vitejs/plugin-vue": "^6.0.9",
     "@vitest/coverage-v8": "^5.0.2",
     "@vue/test-utils": "^2.5.1",
-    "dotenv": "^17.0.0",
     "jsdom": "^30.1.1",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
