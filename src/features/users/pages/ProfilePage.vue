@@ -112,6 +112,7 @@ async function onPasswordSubmit() {
   const isSuccess = await usersStore.changePassword({
     password: currentPassword.value,
     new_password: newPassword.value,
+    new_password_confirmation: confirmPassword.value,
   });
 
   if (isSuccess) {

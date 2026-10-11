@@ -75,6 +75,9 @@ export const useAuthStore = defineStore("auth", () => {
     if (!confirmed) return false;
 
     isAuthLogout.value = true;
+    // Cabut token di server. Jika gagal (mis. sudah kedaluwarsa), sesi lokal
+    // tetap dibersihkan agar pengguna tidak "terjebak" login.
+    await authApi.logout();
     removeAccessToken();
     token.value = null;
     isAuthLogout.value = false;

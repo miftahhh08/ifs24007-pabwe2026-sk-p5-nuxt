@@ -33,6 +33,11 @@ export const authApi = {
     });
   },
 
+  /** POST /auth/logout (mencabut token di server) */
+  logout(): Promise<ApiResponse<null>> {
+    return fetchApi<null>("/auth/logout", { method: "POST" });
+  },
+
   /** POST /auth/register */
   register(payload: RegisterPayload): Promise<ApiResponse<null>> {
     return fetchApi<null>("/auth/register", {

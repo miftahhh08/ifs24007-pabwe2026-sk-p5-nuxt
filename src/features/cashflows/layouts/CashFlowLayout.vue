@@ -1,39 +1,51 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
-import { RouterView, useRouter } from "vue-router";
-import NavbarComponent from "../components/NavbarComponent.vue";
-import SidebarComponent from "../components/SidebarComponent.vue";
+import { onMounted, ref, watch } from "vue";
+import { RouterView, useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "../../auth/states/authStore";
 import { useUsersStore } from "../../users/states/usersStore";
+import NavbarComponent from "../components/NavbarComponent.vue";
+import SidebarComponent from "../components/SidebarComponent.vue";
 
+const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 const usersStore = useUsersStore();
+
 const sidebarOpen = ref(false);
 
-// Guard: halaman ini hanya untuk pengguna yang sudah login
-onMounted(async () => {
-  if (!authStore.isAuthenticated) {
-    await router.replace("/auth/login");
-    return;
-  }
+// Guard: area dashboard hanya untuk pengguna yang sudah login.
+watch(
+  () => authStore.isAuthenticated,
+  (isAuthenticated) => {
+    if (!isAuthenticated) router.replace("/auth/login");
+  },
+  { immediate: true }
+);
 
-  const response = await usersStore.fetchProfile();
-  if (!response.success && response.status === 401) {
-    // Token tidak valid / kedaluwarsa
-    await authStore.logout();
-    await router.replace("/auth/login");
+// Tutup sidebar (layar kecil) setiap kali berpindah halaman.
+watch(
+  () => route.fullPath,
+  () => {
+    sidebarOpen.value = false;
   }
+);
+
+onMounted(() => {
+  if (authStore.isAuthenticated) usersStore.fetchProfile();
 });
 </script>
 
 <template>
-  <div class="min-h-screen lg:pl-64">
+  <div v-if="authStore.isAuthenticated" class="flex min-h-screen" data-testid="cashflow-layout">
     <SidebarComponent :open="sidebarOpen" @close="sidebarOpen = false" />
-    <div class="flex min-h-screen flex-col">
-      <NavbarComponent @toggle="sidebarOpen = !sidebarOpen" />
-      <main class="flex-1 p-4 sm:p-6">
-        <RouterView />
+
+    <div class="flex min-w-0 flex-1 flex-col">
+      <NavbarComponent @toggle-sidebar="sidebarOpen = !sidebarOpen" />
+
+      <main class="flex-1 p-4 sm:p-6 lg:p-8">
+        <div class="mx-auto max-w-7xl">
+          <RouterView />
+        </div>
       </main>
     </div>
   </div>

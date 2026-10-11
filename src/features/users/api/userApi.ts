@@ -23,6 +23,7 @@ export interface UpdateProfilePayload {
 export interface ChangePasswordPayload {
   password: string;
   new_password: string;
+  new_password_confirmation: string;
 }
 
 export const userApi = {

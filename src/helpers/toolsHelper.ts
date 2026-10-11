@@ -20,6 +20,15 @@ export function showErrorDialog(message: string, title = "Gagal") {
   });
 }
 
+export function showWarningDialog(message: string, title = "Perhatian") {
+  return Swal.fire({
+    icon: "warning",
+    title,
+    text: message,
+    confirmButtonColor: "#059669",
+  });
+}
+
 export async function showConfirmDialog(
   message: string,
   title = "Apakah kamu yakin?",

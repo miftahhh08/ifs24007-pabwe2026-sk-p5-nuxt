@@ -1,62 +1,83 @@
-import { apiFetch } from "../../../helpers/apiHelper";
+import { fetchApi, type ApiResponse } from "../../../helpers/apiHelper";
+import type {
+  CashFlow,
+  CashFlowChartQueryParams,
+  CashFlowChartStats,
+  CashFlowPayload,
+  CashFlowQueryParams,
+  CashFlowStats,
+} from "../states/cashFlowsStore";
 
-export type CashFlowType = "inflow" | "outflow";
-export type CashFlowSource = "cash" | "savings" | "loans";
+const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
 
-export interface CashFlow {
-  id: string;
-  type: CashFlowType;
-  source: CashFlowSource;
-  label: string;
-  nominal: number;
-  description: string;
-  created_at: string;
-  updated_at: string;
+/**
+ * API meminta timestamp "YYYY-MM-DD HH:mm:ss". Input <input type="date">
+ * hanya menghasilkan "YYYY-MM-DD", jadi jamnya dilengkapi di sini:
+ * awal hari (00:00:00) untuk start_date, akhir hari (23:59:59) untuk end_date.
+ */
+export function toApiDate(value: string | undefined, edge: "start" | "end"): string | undefined {
+  if (!value) return undefined;
+  if (!DATE_ONLY.test(value)) return value;
+  return `${value} ${edge === "start" ? "00:00:00" : "23:59:59"}`;
 }
 
-export interface CashFlowStats {
-  total_inflow: number;
-  total_outflow: number;
-  total_balance: number;
-  cash: number;
-  savings: number;
-  loans: number;
-}
+export const cashFlowApi = {
+  /** GET /cash-flows (+ filter) */
+  getCashFlows(
+    params: CashFlowQueryParams = {}
+  ): Promise<ApiResponse<{ cash_flows: CashFlow[]; stats: CashFlowStats }>> {
+    return fetchApi("/cash-flows", {
+      params: {
+        type: params.type,
+        source: params.source,
+        label: params.label,
+        start_date: toApiDate(params.start_date, "start"),
+        end_date: toApiDate(params.end_date, "end"),
+      },
+    });
+  },
 
-export interface CashFlowQueryParams {
-  type?: CashFlowType | "";
-  source?: CashFlowSource | "";
-  label?: string;
-  start_date?: string;
-  end_date?: string;
-}
+  /** GET /cash-flows/:id */
+  getCashFlow(id: number | string): Promise<ApiResponse<{ cash_flow: CashFlow }>> {
+    return fetchApi(`/cash-flows/${id}`);
+  },
 
-export interface CashFlowPayload {
-  type: CashFlowType;
-  source: CashFlowSource;
-  label: string;
-  nominal: number;
-  description: string;
-}
+  /** POST /cash-flows */
+  createCashFlow(payload: CashFlowPayload): Promise<ApiResponse<{ cash_flow_id: number }>> {
+    return fetchApi("/cash-flows", { method: "POST", body: { ...payload } });
+  },
 
-export const getCashFlows = (query: CashFlowQueryParams) =>
-  apiFetch("/cash-flows", { method: "GET", query: { ...query } });
+  /** PUT /cash-flows/:id */
+  updateCashFlow(id: number | string, payload: CashFlowPayload): Promise<ApiResponse<null>> {
+    return fetchApi(`/cash-flows/${id}`, { method: "PUT", body: { ...payload } });
+  },
 
-export const getCashFlow = (id: string) => apiFetch(`/cash-flows/${id}`, { method: "GET" });
+  /** DELETE /cash-flows/:id */
+  deleteCashFlow(id: number | string): Promise<ApiResponse<null>> {
+    return fetchApi(`/cash-flows/${id}`, { method: "DELETE" });
+  },
 
-export const postCashFlow = (payload: CashFlowPayload) =>
-  apiFetch("/cash-flows", { method: "POST", body: payload });
+  /** GET /cash-flows/labels */
+  getLabels(): Promise<ApiResponse<{ labels: string[] }>> {
+    return fetchApi("/cash-flows/labels");
+  },
 
-export const putCashFlow = (id: string, payload: CashFlowPayload) =>
-  apiFetch(`/cash-flows/${id}`, { method: "PUT", body: payload });
+  /** GET /cash-flows/stats/daily */
+  getStatsDaily(params: CashFlowChartQueryParams = {}): Promise<ApiResponse<CashFlowChartStats>> {
+    return fetchApi("/cash-flows/stats/daily", {
+      params: { end_date: toApiDate(params.end_date, "end"), total_data: params.total_data },
+    });
+  },
 
-export const deleteCashFlow = (id: string) =>
-  apiFetch(`/cash-flows/${id}`, { method: "DELETE" });
+  /** GET /cash-flows/stats/monthly */
+  getStatsMonthly(params: CashFlowChartQueryParams = {}): Promise<ApiResponse<CashFlowChartStats>> {
+    return fetchApi("/cash-flows/stats/monthly", {
+      params: { end_date: toApiDate(params.end_date, "end"), total_data: params.total_data },
+    });
+  },
 
-export const getLabels = () => apiFetch("/cash-flows/labels", { method: "GET" });
-
-export const getStatsDaily = () => apiFetch("/cash-flows/stats/daily", { method: "GET" });
-
-export const getStatsMonthly = () => apiFetch("/cash-flows/stats/monthly", { method: "GET" });
-
-export const deleteAllCashFlows = () => apiFetch("/cash-flows", { method: "DELETE" });
+  /** DELETE /cash-flows (hapus SEMUA catatan milik pengguna) */
+  deleteAllCashFlows(): Promise<ApiResponse<null>> {
+    return fetchApi("/cash-flows", { method: "DELETE" });
+  },
+};
