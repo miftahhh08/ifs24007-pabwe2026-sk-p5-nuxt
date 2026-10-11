@@ -20,9 +20,9 @@ const routes = [
 
 async function submit(name: string, email: string, password: string) {
   const ctx = await renderWithProviders(RegisterPage, { route: "/auth/register", routes });
-  await ctx.wrapper.find("#register-name").setValue(name);
-  await ctx.wrapper.find("#register-email").setValue(email);
-  await ctx.wrapper.find("#register-password").setValue(password);
+  await ctx.wrapper.find("#register-name-input").setValue(name);
+  await ctx.wrapper.find("#register-email-input").setValue(email);
+  await ctx.wrapper.find("#register-password-input").setValue(password);
   await ctx.wrapper.find("form").trigger("submit");
   await flushPromises();
   return ctx;
@@ -37,6 +37,7 @@ describe("RegisterPage", () => {
 
   it("menampilkan tautan masuk", async () => {
     const { wrapper } = await renderWithProviders(RegisterPage, { routes });
+    expect(wrapper.find("#register-submit-button").exists()).toBe(true);
     expect(wrapper.find("a").attributes("href")).toBe("/auth/login");
   });
 

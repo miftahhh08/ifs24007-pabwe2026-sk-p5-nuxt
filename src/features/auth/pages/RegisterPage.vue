@@ -39,9 +39,9 @@ async function handleSubmit() {
 
     <form class="mt-8 space-y-5" data-testid="register-form" @submit.prevent="handleSubmit">
       <div>
-        <label for="register-name" class="mb-1.5 block text-sm font-semibold">Nama lengkap</label>
+        <label for="register-name-input" class="mb-1.5 block text-sm font-semibold">Nama lengkap</label>
         <input
-          id="register-name"
+          id="register-name-input"
           v-model="name"
           type="text"
           autocomplete="name"
@@ -50,9 +50,9 @@ async function handleSubmit() {
         />
       </div>
       <div>
-        <label for="register-email" class="mb-1.5 block text-sm font-semibold">Email</label>
+        <label for="register-email-input" class="mb-1.5 block text-sm font-semibold">Email</label>
         <input
-          id="register-email"
+          id="register-email-input"
           v-model="email"
           type="email"
           autocomplete="email"
@@ -61,9 +61,9 @@ async function handleSubmit() {
         />
       </div>
       <div>
-        <label for="register-password" class="mb-1.5 block text-sm font-semibold">Kata sandi</label>
+        <label for="register-password-input" class="mb-1.5 block text-sm font-semibold">Kata sandi</label>
         <input
-          id="register-password"
+          id="register-password-input"
           v-model="password"
           type="password"
           autocomplete="new-password"
@@ -72,6 +72,7 @@ async function handleSubmit() {
         />
       </div>
       <button
+        id="register-submit-button"
         type="submit"
         :disabled="authStore.isAuthRegister"
         class="w-full rounded-xl bg-emerald-600 px-4 py-3 font-bold text-white transition hover:bg-emerald-700 disabled:opacity-60"

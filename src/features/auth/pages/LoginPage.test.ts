@@ -20,8 +20,8 @@ const routes = [
 
 async function submit(email: string, password: string) {
   const ctx = await renderWithProviders(LoginPage, { route: "/auth/login", routes });
-  await ctx.wrapper.find("#login-email").setValue(email);
-  await ctx.wrapper.find("#login-password").setValue(password);
+  await ctx.wrapper.find("#login-email-input").setValue(email);
+  await ctx.wrapper.find("#login-password-input").setValue(password);
   await ctx.wrapper.find("form").trigger("submit");
   await flushPromises();
   return ctx;
@@ -37,6 +37,7 @@ describe("LoginPage", () => {
   it("menampilkan form dan tautan daftar", async () => {
     const { wrapper } = await renderWithProviders(LoginPage, { routes });
     expect(wrapper.text()).toContain("Masuk");
+    expect(wrapper.find("#login-submit-button").exists()).toBe(true);
     expect(wrapper.find("a").attributes("href")).toBe("/auth/register");
   });
 

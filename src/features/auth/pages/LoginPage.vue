@@ -37,9 +37,9 @@ async function handleSubmit() {
 
     <form class="mt-8 space-y-5" data-testid="login-form" @submit.prevent="handleSubmit">
       <div>
-        <label for="login-email" class="mb-1.5 block text-sm font-semibold">Email</label>
+        <label for="login-email-input" class="mb-1.5 block text-sm font-semibold">Email</label>
         <input
-          id="login-email"
+          id="login-email-input"
           v-model="email"
           type="email"
           autocomplete="email"
@@ -48,9 +48,9 @@ async function handleSubmit() {
         />
       </div>
       <div>
-        <label for="login-password" class="mb-1.5 block text-sm font-semibold">Kata sandi</label>
+        <label for="login-password-input" class="mb-1.5 block text-sm font-semibold">Kata sandi</label>
         <input
-          id="login-password"
+          id="login-password-input"
           v-model="password"
           type="password"
           autocomplete="current-password"
@@ -59,6 +59,7 @@ async function handleSubmit() {
         />
       </div>
       <button
+        id="login-submit-button"
         type="submit"
         :disabled="authStore.isAuthLogin"
         class="w-full rounded-xl bg-emerald-600 px-4 py-3 font-bold text-white transition hover:bg-emerald-700 disabled:opacity-60"
